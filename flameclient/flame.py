@@ -112,7 +112,7 @@ class TemplateGenerator(object):
 
     @staticmethod
     def print_generated(filename):
-        print(yaml.safe_dump(filename, default_flow_style=False))
+        return yaml.safe_dump(filename, default_flow_style=False)
 
     def add_resource(self, name, status, resource_id, resource_type):
         resource = {

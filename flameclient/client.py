@@ -31,14 +31,33 @@ class Client(object):
         username = kwargs.get('username')
         password = kwargs.get('password')
         tenant_name = kwargs.get('tenant_name')
+        tenant_id = kwargs.get('tenant_id')
         auth_url = kwargs.get('auth_url')
-
         insecure = kwargs.get('insecure')
+        nova = kwargs.get('nova')
+        neutron = kwargs.get('neutron')
+        cinder = kwargs.get('cinder')
+
         self.template_generator = TemplateGenerator(username, password,
                                                     tenant_name, auth_url,
                                                     insecure)
+        if nova:
+            self.template_generator.nova.set_client(nova)
+        if neutron and tenant_id:
+            self.template_generator.neutron.set_client(neutron)
+            self.template_generator.neutron.set_project_id(tenant_id)
+        if cinder:
+            self.template_generator.cinder.set_client(cinder)
 
-    def generate(self, include_networks, include_instances, include_volumes):
-        return self.template_generator.generate(include_networks,
-                                                include_instances,
-                                                include_volumes)
+
+    def generate_template(self, include_instances, include_volumes,
+                          include_data_file):
+        self.template_generator.extract_vm_details(
+            exclude_servers=not include_instances,
+            exclude_volumes=not include_volumes,
+            generate_data=include_data_file)
+        self.template_generator.extract_data()
+        flame_stream = self.template_generator.heat_template()
+        data_stream = self.template_generator.stack_data_template()
+
+        return flame_stream + data_stream
