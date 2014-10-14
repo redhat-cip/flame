@@ -60,4 +60,4 @@ class Client(object):
         flame_stream = self.template_generator.heat_template()
         data_stream = self.template_generator.stack_data_template()
 
-        return flame_stream + data_stream
+        return (flame_stream,  data_stream)
