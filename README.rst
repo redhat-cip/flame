@@ -1,11 +1,10 @@
+=========================================
 Flame: Automatic Heat template generation
-============================================
+=========================================
 
-Description
------------
-
+----
 Heat
-^^^^
+----
 
 OpenStack Orchestration project Heat implements an orchestration engine to
 launch multiple composite cloud applications based on templates. A Heat
@@ -16,15 +15,15 @@ resources in a correct order and to manage whole infrastructure lifecycle.
 Today Heat provides compatibility with the AWS CloudFormation template format
 and has its own, native format called Heat Orchestration Template (HOT).
 
-
+-----
 Flame
-^^^^^
+-----
 
-In this blog-post I will talk about Flame, a tool that generates HOT Heat
-template from already existing infrastructure. Currently this project is
-developed by Thomas Herve (Heat core developer) and myself and provides support
-for Nova (key pairs and servers), Cinder (volumes) and Neutron (router,
-networks, subnets, security groups and floating IPs) resources.
+Flame, a tool that generates HOT Heat template from already existing
+infrastructure. Currently this project is developed by Thomas Herve (Heat core
+developer) and myself and provides support for Nova (key pairs and servers),
+Cinder (volumes) and Neutron (router, networks, subnets, security groups and
+floating IPs) resources.
 
 Flame works as follows: using provided credentials (user name, project name,
 password, authentication url), the tool will list supported resources deployed
@@ -32,7 +31,7 @@ in the project and will generate corresponding, highly customized HOT template.
 
 
 First example : Router, network, instance from image
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------------------------
 
 The easiest way to understand how Flame works is to show some examples. So here
 they are.
@@ -169,13 +168,14 @@ will explain here for each resource type, the possible parameters and its
 relationship with other resources.
 
 Floating IP
-"""""""""""
+~~~~~~~~~~~
 ::
-      floatingip_0:
-        properties:
-          floating_network_id:
+
+   floatingip_0:
+      properties:
+         floating_network_id:
             get_param: external_network_for_floating_ip_0
-        type: OS::Neutron::FloatingIP
+         type: OS::Neutron::FloatingIP
 
 Each resource declaration block is headed by the resource ID: floatingip_0 for
 this resource. Every resource ID must be unique within the resource
@@ -188,40 +188,42 @@ add a parameter external_network_for_floating_ip_0, that will be provided by
 the user during Heat stack creation.
 
 Key Pair used to access the instance
-""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ::
-      key_0:
-        properties:
-          name: arezmerita
-          public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8u8FIZjmhO+hM/f+2J9qYKgJPG16pQmBfQeUvFlC5u9xxf57eGKuq7xYMIoW63gGM8dnsXcQp9Lmp/+TacwPkis5Q8LKriJSxZUgwczM2ppwwJ/SOraRDHy+2bgbrrO2ZYNdoD5zBaiC5jh6YemrB+y5TtkiEo+llNZw+6e5TlZxEEGD4Zgid/Tfz4qwkKvoGwx34ltQ+XvT2Tv6kE7JWc8rR37wkCbLVQd3G3vAJFI3bWrYan3XNP5+wsVydWn3APF2l8FtLkSpE5Fkai7OWACPRZ9zNlQSBk6pRNlxfZ8jQL6Kuk3MU2tTrqw5g/jG7Hlu3vCeDIYOiFI2a8GUX
-        type: OS::Nova::KeyPair
+
+   key_0:
+      properties:
+         name: arezmerita
+         public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8u8FIZjmhO+hM/f+2J9qYKgJPG16pQmBfQeUvFlC5u9xxf57eGKuq7xYMIoW63gGM8dnsXcQp9Lmp/+TacwPkis5Q8LKriJSxZUgwczM2ppwwJ/SOraRDHy+2bgbrrO2ZYNdoD5zBaiC5jh6YemrB+y5TtkiEo+llNZw+6e5TlZxEEGD4Zgid/Tfz4qwkKvoGwx34ltQ+XvT2Tv6kE7JWc8rR37wkCbLVQd3G3vAJFI3bWrYan3XNP5+wsVydWn3APF2l8FtLkSpE5Fkai7OWACPRZ9zNlQSBk6pRNlxfZ8jQL6Kuk3MU2tTrqw5g/jG7Hlu3vCeDIYOiFI2a8GUX
+      type: OS::Nova::KeyPair
 
 Like floating IP resource, this key pair resource has an ID and a type. In
 addition, the name and the value of the public key are specified.
 
 Network
-"""""""
+~~~~~~~
 ::
-      network_0:
-        properties:
-          admin_state_up: true
-          name: network
-          shared: false
-        type: OS::Neutron::Net
-      network_subnet_0:
-        properties:
-          allocation_pools:
-          - end: 10.0.48.254
-            start: 10.0.48.242
-          cidr: 10.0.48.240/28
-          dns_nameservers: []
-          enable_dhcp: true
-          host_routes: []
-          ip_version: 4
-          name: network_subnet
-          network_id:
+
+   network_0:
+      properties:
+         admin_state_up: true
+         name: network
+         shared: false
+      type: OS::Neutron::Net
+   network_subnet_0:
+      properties:
+         allocation_pools:
+         - end: 10.0.48.254
+           start: 10.0.48.242
+         cidr: 10.0.48.240/28
+         dns_nameservers: []
+         enable_dhcp: true
+         host_routes: []
+         ip_version: 4
+         name: network_subnet
+         network_id:
             get_resource: network_0
-        type: OS::Neutron::Subnet
+      type: OS::Neutron::Subnet
 
 Declaration of the network resource does not differ much from from two previous
 resources. However, the subnet resource that belongs to the network_0 resource
@@ -230,27 +232,28 @@ network_0 resource using get_resource: network_0. At runtime, this reference
 will be resolved to reference ID of the network resource.
 
 Router, router gateway, router interface
-""""""""""""""""""""""""""""""""""""""""
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ::
-      router_0:
-        properties:
-          admin_state_up: true
-          name: router
-        type: OS::Neutron::Router
-      router_0_gateway:
-        properties:
-          network_id:
+
+   router_0:
+      properties:
+         admin_state_up: true
+         name: router
+      type: OS::Neutron::Router
+   router_0_gateway:
+      properties:
+         network_id:
             get_param: router_0_external_network
-          router_id:
+         router_id:
             get_resource: router_0
-        type: OS::Neutron::RouterGateway
-      router_0_interface_0:
-        properties:
-          router_id:
+      type: OS::Neutron::RouterGateway
+   router_0_interface_0:
+      properties:
+         router_id:
             get_resource: router_0
-          subnet_id:
+         subnet_id:
             get_resource: network_subnet_0
-        type: OS::Neutron::RouterInterface
+      type: OS::Neutron::RouterInterface
 
 These three resources are closely related. The router_0 resource declares a
 router. The router_0_gateway declares external network gateway for this router
@@ -261,30 +264,31 @@ The router_0_interface_0 resource declares an internal network interface to the
 router_0.
 
 Security group
-""""""""""""""
+~~~~~~~~~~~~~~
 ::
-      newdefault_0:
-        properties:
-          description: default
-          name: newdefault
-          rules:
-          - direction: egress
-            ethertype: IPv6
-          - direction: ingress
-            ethertype: IPv6
-            remote_mode: remote_group_id
-          - direction: ingress
-            ethertype: IPv4
-            port_range_max: 22
-            port_range_min: 22
-            protocol: tcp
-            remote_ip_prefix: 0.0.0.0/0
-          - direction: egress
-            ethertype: IPv4
-          - direction: ingress
-            ethertype: IPv4
-            remote_mode: remote_group_id
-        type: OS::Neutron::SecurityGroup
+
+   newdefault_0:
+      properties:
+         description: default
+         name: newdefault
+         rules:
+         - direction: egress
+           ethertype: IPv6
+         - direction: ingress
+           ethertype: IPv6
+           remote_mode: remote_group_id
+         - direction: ingress
+           ethertype: IPv4
+           port_range_max: 22
+           port_range_min: 22
+           protocol: tcp
+           remote_ip_prefix: 0.0.0.0/0
+         - direction: egress
+           ethertype: IPv4
+         - direction: ingress
+           ethertype: IPv4
+           remote_mode: remote_group_id
+      type: OS::Neutron::SecurityGroup
 
 The default security group is created automatically for each project. The user
 can add new rules in this group, but the user is not allowed to delete this
@@ -292,8 +296,9 @@ group or create another security group with the name default. For this reason,
 when we export this group, we rename it to _default.
 
 Instance
-""""""""
+~~~~~~~~
 ::
+
       server_0:
         properties:
           block_device_mapping: []
@@ -319,7 +324,7 @@ get_param: image_server_0. The keypair name, network and security group will be
 automatically resolved.
 
 Second example : Router, network, two instances, volumes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------
 
 The second example will focus on volumes. Like in previous example, in your
 project you deployed a router, a network with corresponding subnet and two
@@ -331,68 +336,69 @@ For this infrastructure, generated template will look like this (only the major
 differences are showed):
 
 ::
-    description: Generated template
-    heat_template_version: 2013-05-23
-    parameters:
-    ......
+
+   description: Generated template
+   heat_template_version: 2013-05-23
+   parameters:
+   ......
       flavor_server_0:
-        default: m1.small
-        description: Flavor to use for instance instance
-        type: string
+         default: m1.small
+         description: Flavor to use for instance instance
+         type: string
       flavor_server_1:
-        default: m1.small
-        description: Flavor to use for instance instance_from_volume
-        type: string
+         default: m1.small
+         description: Flavor to use for instance instance_from_volume
+         type: string
       image_server_0:
-        description: Image to use to boot instance instance
-        type: string
+         description: Image to use to boot instance instance
+         type: string
       volume_image_1:
-        description: Image to create volume volume_from_image
-        type: string
+         description: Image to create volume volume_from_image
+         type: string
       volume_type_0:
-        default: iscsi
-        description: Volume type for volume resource volume_0
-        type: string
+         default: iscsi
+         description: Volume type for volume resource volume_0
+         type: string
       volume_type_1:
-        default: iscsi
-        description: Volume type for volume resource volume_1
-        type: string
-    resources:
-    ......
+         default: iscsi
+         description: Volume type for volume resource volume_1
+         type: string
+   resources:
+   ......
       server_0:
-        properties:
-          block_device_mapping:
-          - device_name: /dev/vdb
-            volume_id:
-              get_resource: volume_0
-          diskConfig: AUTO
-          flavor:
-            get_param: flavor_server_0
-          image:
-            get_param: image_server_0
-          key_name:
-            get_resource: key_0
-          name: instance
-          networks:
-          - network:
-              get_resource: network_0
-          security_groups:
-          - get_resource: _default_0
-        type: OS::Nova::Server
+         properties:
+            block_device_mapping:
+            - device_name: /dev/vdb
+              volume_id:
+                 get_resource: volume_0
+              diskConfig: AUTO
+              flavor:
+                 get_param: flavor_server_0
+              image:
+                 get_param: image_server_0
+              key_name:
+                 get_resource: key_0
+              name: instance
+              networks:
+              - network:
+                get_resource: network_0
+              security_groups:
+              - get_resource: _default_0
+            type: OS::Nova::Server
       server_1:
-        properties:
-          block_device_mapping:
-          - device_name: vda
-            volume_id:
-              get_resource: volume_1
-          diskConfig: AUTO
-          flavor:
-            get_param: flavor_server_1
-          key_name:
-            get_resource: key_0
-          name: instance_from_volume
-          networks:
-          - network:
+         properties:
+            block_device_mapping:
+            - device_name: vda
+              volume_id:
+                 get_resource: volume_1
+              diskConfig: AUTO
+            flavor:
+               get_param: flavor_server_1
+            key_name:
+               get_resource: key_0
+            name: instance_from_volume
+            networks:
+            - network:
               get_resource: network_0
           security_groups:
           - get_resource: _default_0
@@ -435,7 +441,7 @@ And since an image is used to create bootable volume **volume_1**, Flame will
 add **volume_image_1** parameter in template parameters section.
 
 Conclusion
-^^^^^^^^^^
+----------
 
 In this article we saw how to use Flame to automatically generate Heat template
 from existing infrastructure. Generated template is highly customized, can be
